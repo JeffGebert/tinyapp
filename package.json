@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/JeffGebert/tinyapp/issues"
   },
-  "homepage": "https://github.com/JeffGebert/tinyapp#readme"
+  "homepage": "https://github.com/JeffGebert/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
