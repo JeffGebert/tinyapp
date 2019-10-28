@@ -78,4 +78,13 @@ app.post("/urls", (req, res) => {
 
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  console.log(req.params.shortURL);
+  delete urlDatabase[req.params.shortURL];
+  console.log("heiileile")
+  res.redirect("/urls");
+  
+
+});
+
 
