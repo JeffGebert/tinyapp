@@ -62,6 +62,27 @@ function passwordLookup(email1,password) {
   return false;
 }
 
+function urlsForUser(id) {
+  let userURLS ={};
+
+  for (url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      userURLS[url] = urlDatabase[url];
+
+    }
+  };
+  return userURLS;
+
+}
+
+function editDeleteAuthenticate(id, key) {
+ 
+  if (urlDatabase[key].userID === id){
+    return true;
+  }
+  return false;
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -86,9 +107,14 @@ app.get("/set", (req, res) => {
  });
 
  app.get("/urls", (req, res) => {
+   if (req.cookies.user_id) {
+    let x = urlsForUser(req.cookies.user_id);
+    let templateVars = { urls: x , user: users[req.cookies.user_id]};
+    res.render("urls_index", templateVars);
 
-   let templateVars = { urls: urlDatabase , user: users[req.cookies.user_id]};
-   res.render("urls_index", templateVars);
+   } else {
+     res.redirect("/login");
+   }
 
  });
 
@@ -99,34 +125,44 @@ app.get("/set", (req, res) => {
 });
 
  app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies.user_id]};
+  let x = urlsForUser(req.cookies.user_id);
+  let templateVars = { urls: x, user: users[req.cookies.user_id]};
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  longURL =  urlDatabase[req.params.shortURL]
+  let longURL =  urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
 
   let randomString = generateRandomString();
-  urlDatabase[randomString]=req.body.longURL;
+  urlDatabase[randomString]={"longURL":req.body.longURL,
+  "userID":req.cookies.user_id};
   res.redirect(`/urls/${randomString}`);
 
 });
 
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL]; 
-  res.redirect("/urls");
+  if (editDeleteAuthenticate(req.cookies.user_id, req.params.shortURL)) {
+    delete urlDatabase[req.params.shortURL]; 
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login")
+  };
   
 
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  urlDatabase[req.params.shortURL]=req.body.longURL;
-  res.redirect("/urls");
+  if (editDeleteAuthenticate(req.cookies.user_id, req.params.shortURL)) {
+    urlDatabase[req.params.shortURL]=req.body.longURL;
+    res.redirect("/urls");
+  } else {
+    res.redirect("login");
+  }
   
 
 });
@@ -155,7 +191,7 @@ app.post("/login", (req, res) => {
 
 
   let templateVars = {user : users[req.cookies.user_id]};
-  res.cookie(username, users[req.cookies.user_id]); 
+  res.cookie("user_id", users[req.cookies.user_id]); 
   res.redirect("/urls");
   }
 
