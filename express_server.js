@@ -3,8 +3,10 @@ const express = require(`express`);
 const app = express();
 app.use(cookieSession({
   name: 'session',
-  keys: ['key1'],
-  maxAge: 24 * 60 * 60 * 1000
+  keys:  [
+    '7de13381-61b5-47aa-9c74-5ede1ceac390',
+    '8dddb6db-4d8d-4571-a836-04fa8d5a9186',
+  ],
 }));
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
@@ -217,7 +219,7 @@ app.get("/login", (req, res) => {
 
 
 app.post("/logout", (req, res) => {
-
+  req.session.sig = null;
   req.session = null;
   res.redirect("/urls");
 
