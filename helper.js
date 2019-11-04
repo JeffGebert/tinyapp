@@ -1,6 +1,9 @@
 const {urlDatabase, users} = require("./database");
 const bcrypt = require('bcryptjs');
 
+
+//generates random string for user_id.
+
 function generateRandomString() {
   let result           = '';
   let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -12,6 +15,8 @@ function generateRandomString() {
 
 }
 
+// checks for an email in the database.  
+
 function emailLookup(email1, database) {
   for (user in users) {
     if (users[user].email === email1) {
@@ -22,7 +27,9 @@ function emailLookup(email1, database) {
   return false;
 }
 
-function passwordLookup(email1,password) {
+//looksup password and matches users password against password in the database.
+
+function passwordLookup(email1, password) {
 
   for (user in users) {
     if (users[user].email === email1) {
@@ -34,6 +41,9 @@ function passwordLookup(email1,password) {
   }
   return false;
 }
+
+
+// returns urls for user_id to be displayed on the urls page for current user logged in.
 
 function urlsForUser(id) {
   let userURLS = {};
@@ -48,6 +58,8 @@ function urlsForUser(id) {
   return userURLS;
 
 }
+
+//checks to see if current user is user who created link in the database.
 
 function editDeleteAuthenticate(id, key) {
   try {

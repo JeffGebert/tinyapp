@@ -19,6 +19,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.set("view engine", "ejs");
 
+//main route to take to homepage.  Will route to login if user is not currently logged in.
 app.get("/", (req, res) => {
 
   if (req.session.user_id) {
@@ -31,6 +32,8 @@ app.get("/", (req, res) => {
   }
 
 });
+
+//reroutes to list of urls page for current user if logged in.  If not logged in will send response instructing to login first.
 
 app.get("/urls", (req, res) => {
 
@@ -46,6 +49,8 @@ app.get("/urls", (req, res) => {
 
 });
 
+//routes to page to add a url.  if not logged in will redirect to the login page
+
 app.get("/urls/new", (req, res) => {
 
   if (req.session.user_id) {
@@ -58,6 +63,8 @@ app.get("/urls/new", (req, res) => {
   }
 
 });
+
+//routes to page to modify url.  If not logged in will redirect to login page.
 
 app.get("/urls/:shortURL", (req, res) => {
 
@@ -76,6 +83,8 @@ app.get("/urls/:shortURL", (req, res) => {
 
 });
 
+//will redirect to the longurl.  if user enters a wrong short url it will send an error status.
+
 app.get("/u/:shortURL", (req, res) => {
 
   if (!req.session.user_id) {
@@ -88,6 +97,9 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+
+//will generate a random string to use for the short url and stores in the urlDatabase.  Will redirect after to a page to view and update the url. 
+
 app.post("/urls", (req, res) => {
 
   let randomString = generateRandomString();
@@ -96,6 +108,8 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 
 });
+
+//deletes shortURL if user created url.  Will than redirect to the urls page.  If not will redirect to the login page.
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (editDeleteAuthenticate(req.session.user_id, req.params.shortURL)) {
@@ -107,6 +121,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   
 });
 
+//will redirect to a page to update url if user is owner of url and loggedin.  if not logged in redirects to login page.
+
 app.post("/urls/:shortURL/update", (req, res) => {
   if (editDeleteAuthenticate(req.session.user_id, req.params.shortURL)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
@@ -116,6 +132,8 @@ app.post("/urls/:shortURL/update", (req, res) => {
   }
   
 });
+
+//checks email and password match in database.  If incorrect will send appropriate message.  If successful redirects to login page.
 
 app.post("/login", (req, res) => {
 
@@ -142,6 +160,8 @@ app.post("/login", (req, res) => {
 
 });
 
+//retrieves the login page.
+
 app.get("/login", (req, res) => {
 
   let templateVars = {user : users[req.session.user_id]};
@@ -150,12 +170,16 @@ app.get("/login", (req, res) => {
 
 });
 
+//logout of current session and get rid of cookies.
+
 app.post("/logout", (req, res) => {
   req.session.sig = null;
   req.session = null;
   res.redirect("/urls");
 
 });
+
+//brings up registration page.
 
 app.get("/register", (req, res) => {
   if(req.session.user_id) {
@@ -166,6 +190,8 @@ app.get("/register", (req, res) => {
   let templateVars = {user : users[req.session.user_id]};
   res.render("register", templateVars);
 });
+
+//registers user if successfully enters email not already in the database.  On error sends appropriate error messages.
 
 app.post("/register", (req, res) => {
 
