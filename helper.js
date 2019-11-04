@@ -43,18 +43,24 @@ function urlsForUser(id) {
       userURLS[url] = urlDatabase[url];
 
     }
-  };
+  }
+  
   return userURLS;
 
 }
 
 function editDeleteAuthenticate(id, key) {
- 
+  try {
   if (urlDatabase[key].userID === id) {
     return true;
   }
+  } catch(err) {
+    return false;
+  }
+
   return false;
 }
+
 
 
 module.exports = {generateRandomString, emailLookup, passwordLookup, urlsForUser, editDeleteAuthenticate};

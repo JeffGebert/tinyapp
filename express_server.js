@@ -19,7 +19,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.set("view engine", "ejs");
 
-app.get("/urls", (req, res) => {
+app.get("/", (req, res) => {
 
   if (req.session.user_id) {
     let x = urlsForUser(req.session.user_id);
@@ -32,21 +32,60 @@ app.get("/urls", (req, res) => {
 
 });
 
-app.get("/urls/new", (req, res) => {
-  let templateVars = {user: users[req.session.user_id]};
+app.get("/urls", (req, res) => {
 
-  res.render("urls_new", templateVars);
+  if (req.session.user_id) {
+    let x = urlsForUser(req.session.user_id);
+    let templateVars = { urls: x , user: users[req.session.user_id]};
+    res.render("urls_index", templateVars);
+
+  } else {
+    res.status(400).send('Please login first');
+
+  }
+
+});
+
+app.get("/urls/new", (req, res) => {
+
+  if (req.session.user_id) {
+    let x = urlsForUser(req.session.user_id);
+    let templateVars = { urls: x , user: users[req.session.user_id]};
+    res.render("urls_new", templateVars);
+
+  } else {
+    res.redirect("/login");
+  }
+
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let x = urlsForUser(req.session.user_id);
-  let templateVars = { urls: x, user: users[req.session.user_id]};
-  res.render("urls_show", templateVars);
+
+  if (!req.session.user_id) {
+    res.status(400).send('Please login first');
+
+  } else if (editDeleteAuthenticate(req.session.user_id, req.params.shortURL)) {
+    let x = urlsForUser(req.session.user_id);
+    let templateVars = { urls: x, user: users[req.session.user_id]};
+    res.render("urls_show", templateVars);
+  } else if (!editDeleteAuthenticate(req.session.user_id, req.params.shortURL)) {
+    res.send("URL does not exist or is not owned by the current User");
+  } else {
+    res.redirect("/login");
+  }
+
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL =  urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+
+  if (!req.session.user_id) {
+    res.status(400).send('Please login first');
+  } else if (editDeleteAuthenticate(req.session.user_id, req.params.shortURL)) {
+    let x = urlsForUser(req.session.user_id);
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
+  } else {
+    res.status(400).send('URL does not exist');
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -71,10 +110,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL/update", (req, res) => {
   if (editDeleteAuthenticate(req.session.user_id, req.params.shortURL)) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-    console.log(urlDatabase);
     res.redirect("/urls");
   } else {
-    res.redirect("login");
+    res.redirect("/login");
   }
   
 });
@@ -120,6 +158,10 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  if(req.session.user_id) {
+    res.redirect("/urls");
+
+  }
   
   let templateVars = {user : users[req.session.user_id]};
   res.render("register", templateVars);
