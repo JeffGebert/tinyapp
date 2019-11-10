@@ -87,10 +87,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
 
-  if (!req.session.user_id) {
-    res.status(400).send('Please login first');
-  } else if (editDeleteAuthenticate(req.session.user_id, req.params.shortURL)) {
-    let x = urlsForUser(req.session.user_id);
+  if (urlDatabase[req.params.shortURL].longURL) {
     res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
     res.status(400).send('URL does not exist');
