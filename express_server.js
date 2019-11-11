@@ -86,8 +86,15 @@ app.get("/urls/:shortURL", (req, res) => {
 //will redirect to the longurl.  if user enters a wrong short url it will send an error status.
 
 app.get("/u/:shortURL", (req, res) => {
+  let checker = false;
 
-  if (urlDatabase[req.params.shortURL].longURL) {
+  for (key in urlDatabase) {
+    if (key === req.params.shortURL) {
+      checker = true;
+    }
+  };
+
+  if (checker === true ) {
     res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
     res.status(400).send('URL does not exist');
